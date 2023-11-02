@@ -7,6 +7,10 @@ func main() {
 
 	fmt.Println(get_max_element(arr))
 
+	test_arr := []int{0, 0, 1, 1, 1, 2, 2, 3, 3, 4}
+
+	fmt.Println(remove_duplicate((test_arr)))
+
 }
 
 func get_max_element(arr []int) (max int) {
@@ -25,4 +29,33 @@ func get_max_element(arr []int) (max int) {
 	}
 
 	return _max
+
+}
+
+func remove_duplicate(arr []int) ([]int, []string) {
+
+	var duplicate []string
+
+	var new_arr []int
+
+	for i, el := range arr {
+
+		if i == 0 {
+			new_arr = append(new_arr, el)
+			continue
+		}
+
+		prev_el := arr[i-1]
+
+		if el == prev_el {
+			duplicate = append(duplicate, "_")
+		}
+
+		if el != prev_el {
+			new_arr = append(new_arr, el)
+		}
+
+	}
+
+	return new_arr, duplicate
 }
