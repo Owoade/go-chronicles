@@ -11,7 +11,12 @@ type User struct {
 
 func (u *User) get_remark() {
 
-	u.remark = "This is user is quite unserious, do better!"
+	if u.is_unserious {
+		u.remark = "This is user is quite unserious, do better!"
+		return
+	}
+
+	u.remark = "Satisfactory"
 
 }
 
