@@ -63,4 +63,14 @@ func main() {
 	fmt.Println(opts.get_service_url())
 
 	fmt.Println(user.name)
+
+	anonymous := struct {
+		id int
+		name string
+	}{
+		id: 1,
+		name: "Owoade Anuoluwapo",
+	}
+
+	fmt.Println(anonymous)
 }
