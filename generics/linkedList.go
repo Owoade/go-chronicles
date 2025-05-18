@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"iter"
+)
 
 type Node[T comparable] struct {
 	value T
@@ -110,6 +113,19 @@ func (ll *LinkedList[T]) delete(val T) {
 	}
 }
 
+func (ll *LinkedList[T]) listAllItems() iter.Seq[T] {
+	return func ( yield func(T) bool ){
+		node:= ll.head
+		
+		for node != nil {
+			if !yield(node.value) {
+				return
+			}
+			node = node.next
+		}
+	}
+}
+
 func main() {
 
 	ll := newLinkedList(1)
@@ -131,5 +147,9 @@ func main() {
 	ll.forEach(func(n Node[int]) {
 		fmt.Println(n.value)
 	})
+
+	for item := range ll.listAllItems() {
+		fmt.Println((item))
+	}
 
 }
