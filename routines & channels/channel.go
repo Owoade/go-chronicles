@@ -8,6 +8,7 @@ func main() {
 
 	go test_finc("go routine", &channel)
 
+	// This blocks execution
 	message := <-channel
 
 	fmt.Println(message)
