@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func cron(secs int, callback func()) *time.Timer {
+func timeout(secs int, callback func()) *time.Timer {
 	timer := time.NewTimer(time.Duration(secs) * time.Second)
 
 	defer func() {
@@ -18,7 +18,7 @@ func cron(secs int, callback func()) *time.Timer {
 
 func main() {
 
-	cron(2, func() {
+	timeout(2, func() {
 		fmt.Println("This is a cron handler")
 	})
 
