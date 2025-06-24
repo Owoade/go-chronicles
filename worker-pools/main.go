@@ -16,8 +16,8 @@ func worker(id int, jobs <-chan int, result chan int) {
 
 func main() {
 
-	jobs := make(chan int, 5)
-	result := make(chan int)
+	jobs := make(chan int)
+	result := make(chan int, 5)
 
 	for i := 1; i <= 1; i++ {
 		go worker(i, jobs, result)
@@ -29,7 +29,7 @@ func main() {
 
 	close(jobs)
 
-	for i := 1; i <= 5; i++ {
+	for i := 1; i <= 1; i++ {
 		fmt.Println("Result from worker", <-result)
 	}
 
