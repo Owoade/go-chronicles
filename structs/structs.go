@@ -20,8 +20,11 @@ type User struct {
 		month int
 		year  int
 	}
-	// embeded
-	Physique
+	/*
+			Embeded Struct
+		 	If not passed as a pointer the struct will never be empty hence failing null check
+	*/
+	*Physique
 }
 
 type ServiceOpts struct {
@@ -41,10 +44,6 @@ func main() {
 	user := User{
 		name: "Owoade",
 		age:  20,
-		Physique: Physique{
-			height: 20,
-			weight: 30,
-		},
 	}
 
 	user.Dob.day = 20
@@ -62,13 +61,13 @@ func main() {
 
 	fmt.Println(opts.get_service_url())
 
-	fmt.Println(user.name)
+	fmt.Println(user.name, user, user.Physique)
 
 	anonymous := struct {
-		id int
+		id   int
 		name string
 	}{
-		id: 1,
+		id:   1,
 		name: "Owoade Anuoluwapo",
 	}
 
