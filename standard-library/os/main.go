@@ -3,9 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"syscall"
 )
 
 func main() {
+	dirInfo, _ := os.Stat(".")
+	fmt.Println("dir test info", dirInfo)
+	stat := dirInfo.Sys().(*syscall.Stat_t)
+	fmt.Println("stat", stat.Dev, stat.Ino)
 	// handling file operation
 	file, err := os.Open("test.txt")
 	check(err)
