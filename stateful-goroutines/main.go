@@ -70,3 +70,4 @@ func main() {
 	totalWriteOps := atomic.LoadUint64(&writeOps)
 	fmt.Println("Total write ops", totalWriteOps)
 }
+
