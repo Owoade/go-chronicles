@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func search[T comparable](arr []T, el T) bool {
@@ -18,10 +17,14 @@ func search[T comparable](arr []T, el T) bool {
 
 func main() {
 
-	stringElementIsFound := search([]string{"seyi", "is", "a", "seyi"}, "seyi")
+	var articles = make(map[string][]string)
 
-	numberElementIsFound := search([]int{1, 3, 4, 5}, 9)
+	var str string 
 
-	fmt.Println(stringElementIsFound, numberElementIsFound)
-	
+
+
+	if str == "" {
+		fmt.Println(len(articles["BTC"]), str)
+	}
+
 }
