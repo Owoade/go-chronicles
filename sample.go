@@ -27,4 +27,10 @@ func main() {
 		fmt.Println(len(articles["BTC"]), str)
 	}
 
+	val := []int{10, 20, 30, 40, 50}
+	println(val[0])
+	newSlice := val[1:3]
+	newSlice[0] = 2
+	println(newSlice[0], val[1])
+
 }

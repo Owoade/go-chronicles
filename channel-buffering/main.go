@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func sender(c chan string) {
 	c <- "Please touch grass"
@@ -9,14 +11,18 @@ func sender(c chan string) {
 
 func main() {
 
-	c := make(chan string, 5)
+	c := make(chan string)
 
-	for range 5 {
+	for range 6 {
 		go sender(c)
 	}
-
-	message := <-c
-
-	fmt.Println(message)
+	counter := 0
+	for message := range c {
+		counter++
+		fmt.Println(message)
+		if counter == 2 {
+			close(c)
+		}
+	}
 
 }
