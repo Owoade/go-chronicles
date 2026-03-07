@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os"
 	"os/signal"
@@ -8,8 +9,9 @@ import (
 )
 
 type Runner struct {
+	ctx       context.Context
+	cancel    context.CancelFunc
 	tasks     []func(int)
-	timeout   <-chan time.Time
 	complete  chan error
 	interrupt chan os.Signal
 }
@@ -18,9 +20,11 @@ var ErrInterupt error = errors.New("interupt from OS")
 var ErrTimeout error = errors.New("Timeout error")
 
 func NewRunner(d time.Duration) *Runner {
+	ctx, cancel := context.WithTimeout(context.Background(), d)
 	return &Runner{
-		timeout:   time.After(d),
-		complete:  make(chan error),
+		ctx:       ctx,
+		cancel:    cancel,
+		complete:  make(chan error, 1),
 		interrupt: make(chan os.Signal, 1),
 	}
 }
@@ -33,23 +37,29 @@ func (r *Runner) Add(tasks ...func(int)) {
 
 func (r *Runner) Start() error {
 	signal.Notify(r.interrupt, os.Interrupt)
+	defer signal.Stop(r.interrupt)
+
 	go func() {
 		r.complete <- r.run()
 	}()
 
 	select {
-	case <-r.complete:
-		return nil
+	case err := <-r.complete:
+		return err
 	case <-r.interrupt:
+		r.cancel()
 		return ErrInterupt
-	case <-r.timeout:
-		return ErrTimeout
 	}
 }
 
 func (r *Runner) run() error {
 	for index, task := range r.tasks {
-		task(index)
+		select {
+		case <-r.ctx.Done():
+			return ErrTimeout
+		default:
+			task(index)
+		}
 	}
 
 	println("Runner completed successfuly")
