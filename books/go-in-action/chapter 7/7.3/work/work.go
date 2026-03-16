@@ -40,6 +40,6 @@ func (p *Pool) AddTask(t Task) {
 }
 
 func (p *Pool) Shutdown() {
-	close(p.ch)
 	p.wg.Wait()
+	close(p.ch)
 }

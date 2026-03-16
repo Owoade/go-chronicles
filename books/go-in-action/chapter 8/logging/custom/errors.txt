@@ -1,0 +1,1 @@
+ERROR: 2026/03/16 00:26:33 /Users/owoade/Desktop/growth/go-chronicles/books/go-in-action/chapter 8/logging/custom/main.go:54: Hello there!
