@@ -32,6 +32,8 @@ func FromTar(path string) error {
 			io.Copy(f, tr)
 			f.Close()
 		}
+
+		
 	}
 
 	return nil
