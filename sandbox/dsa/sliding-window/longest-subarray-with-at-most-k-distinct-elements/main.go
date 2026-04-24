@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -55,7 +54,6 @@ func longestSubarrayWithKMostDistinctElement(a []int, k int) int {
 			}
 			i++
 		}
-		fmt.Println(i, j, w, res, lastEntry)
 	}
 
 	return maxInSlice(res)

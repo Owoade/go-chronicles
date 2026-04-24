@@ -8,9 +8,6 @@ var m = make(map[int][]int)
 var sums []int
 
 func main() {
-	// arr := []int{3, 4, 2}
-	// w := maxSumArray(arr, 3)
-	// fmt.Println("max sum array", w)
 	fmt.Println(longestUniqueSubstring("cdinedos"))
 }
 func maxSumArray(a []int, k int) int {
