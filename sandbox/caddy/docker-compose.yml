@@ -1,0 +1,30 @@
+services:
+
+  caddy:
+
+    image: caddy:latest
+
+    ports:
+
+      - "80:80"
+
+      - "443:443"
+
+    volumes:
+
+      - ~/main:/etc/caddy
+
+      - caddy_data:/data
+
+    networks:
+
+      - web
+
+volumes:
+
+  caddy_data:
+
+
+networks:
+
+  web:
