@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,13 +20,15 @@ func main() {
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
 		c.Writer.Header().Set("Cache-Control", "no-cache")
 		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
-		flusher, ok := c.Writer.(gin.ResponseWriter)
+		flusher, ok := c.Writer.(http.Flusher)
 		if !ok {
+			c.String(500, "Streaming unsupported")
 			return
 		}
 
-		logChan := make(chan string)
+		logChan := make(chan string, 100)
 		done := make(chan bool)
 
 		home, _ := os.UserHomeDir()
@@ -34,37 +38,34 @@ func main() {
 			"build",
 			filepath.Join(home, "infracon-apps/rust-ms"),
 			"--name",
-			"railpack-api-image",
+			"railpack-api-image-2",
 		)
 
 		stdout, _ := cmd.StdoutPipe()
 		stderr, _ := cmd.StderrPipe()
 
-		_ = cmd.Start()
+		if err := cmd.Start(); err != nil {
+			c.String(500, err.Error())
+			return
+		}
 
-		// read stdout
-		go func() {
-			scanner := bufio.NewScanner(stdout)
+		readPipe := func(pipe io.ReadCloser) {
+			scanner := bufio.NewScanner(pipe)
+			scanner.Buffer(make([]byte, 0, 64*1024), 1024*1024)
+
 			for scanner.Scan() {
 				logChan <- scanner.Text()
 			}
-		}()
+		}
 
-		// read stderr
-		go func() {
-			scanner := bufio.NewScanner(stderr)
-			for scanner.Scan() {
-				logChan <- scanner.Text()
-			}
-		}()
+		go readPipe(stdout)
+		go readPipe(stderr)
 
-		// wait for command
 		go func() {
 			cmd.Wait()
 			done <- true
 		}()
 
-		// SSE loop
 		for {
 			select {
 			case line := <-logChan:
@@ -82,5 +83,5 @@ func main() {
 		}
 	})
 
-	r.Run(":3000")
+	r.Run(":5000")
 }

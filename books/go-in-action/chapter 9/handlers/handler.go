@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Routes(){
+func Routes() {
 	http.HandleFunc("/json", SendJSON)
 }
 
