@@ -24,12 +24,18 @@ type TransactionState struct {
 
 type Conn struct {
 	net.Conn
+	ID                  string
 	TransactionIsActive bool
 	TransactionState    TransactionState
 }
 
 var store = make(map[string]Value)
 var mu sync.RWMutex
+
+var (
+	subscribers = make(map[string][]*Conn)
+	subscribersMu sync.RWMutex
+)
 
 func main() {
 	listener, err := net.Listen("tcp", ":8080")

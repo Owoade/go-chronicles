@@ -33,9 +33,8 @@ func handleRequest(req string, c *Conn) error {
 		return errors.New("no command provided")
 	}
 
-	command := args[0]
+	command := strings.TrimSpace(args[0])
 	command = strings.ToUpper(command)
-	println("command: ", command)
 	switch command {
 	case "GET":
 		if len(args) < 2 {
@@ -58,6 +57,10 @@ func handleRequest(req string, c *Conn) error {
 		handleRollbackTx(c)
 	case "COMMIT":
 		handleCommitTx(c)
+	case "SUBSCRIBE":
+		handleSubscribe(strings.Join(strings.Split(req, " ")[1:], " "), c)
+	case "PUBLISH":
+		handlePublish(strings.Join(strings.Split(req, " ")[1:], " "), c)
 	default:
 		return errors.New("invalid command")
 	}
@@ -172,11 +175,12 @@ func handleCommitTx(c *Conn) {
 		return
 	}
 
+	c.TransactionIsActive = false
+
 	for _, cmd := range c.TransactionState.Commands {
 		handleRequest(cmd, c)
 	}
 
-	c.TransactionIsActive = false
 	c.TransactionState = TransactionState{}
 
 	respond(c, "COMMIT")
@@ -194,6 +198,25 @@ func handleRollbackTx(c *Conn) {
 	respond(c, "ROLLBACK")
 }
 
+func handleSubscribe(channel string, c *Conn) {
+	channel = strings.TrimSpace(channel)
+	if !checkIfSubscriberExists(channel, c.ID) {
+		subscribers[channel] = append(subscribers[channel], c)
+	}
+	respond(c, "SUBSCRIBE")
+}
+
+func handlePublish(request string, c *Conn) {
+	args := strings.Split(request, " ")
+	channel, message := strings.TrimSpace(args[0]), strings.TrimSpace(args[1])
+
+	for _, s := range subscribers[channel] {
+		respond(s, fmt.Sprintf("[%s]: %s", channel, message))
+	}
+
+	respond(c, "PUBLISH")
+}
+
 func removeKey(key string) func() {
 	return func() {
 		mu.Lock()
@@ -204,4 +227,13 @@ func removeKey(key string) func() {
 
 func respond(c *Conn, message string) {
 	fmt.Fprintf(c, "%s\n", message)
+}
+
+func checkIfSubscriberExists(channel, id string) bool {
+	for _, s := range subscribers[channel] {
+		if s.ID == id {
+			return true
+		}
+	}
+	return false
 }

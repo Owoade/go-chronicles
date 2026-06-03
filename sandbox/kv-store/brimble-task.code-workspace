@@ -1,0 +1,38 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../brimble-task"
+		},
+		{
+			"path": "../../../../../infracon-apps/go-ms"
+		},
+		{
+			"path": "../../../../OSH/osh-be"
+		},
+		{
+			"path": "../../../../WORK/SMOOTH-BALLOT/SMOOTH-BALLOT-BE"
+		},
+		{
+			"path": "../.."
+		},
+		{
+			"path": "../../../../WORK/SMOOTH-BALLOT/smooth-tickets-fe"
+		},
+		{
+			"path": "../../../infracon"
+		},
+		{
+			"path": "../../../react-native-app"
+		},
+		{
+			"path": "../../../instagram-clone"
+		},
+		{
+			"path": "../../../redis-server"
+		},
+		{
+			"path": "../../../../WORK/AI-EDGE/trading-bot"
+		}
+	],
+	"settings": {}
+}
