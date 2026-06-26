@@ -7,15 +7,17 @@ import (
 	"log"
 	"log/slog"
 	"net"
+	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"syscall"
+	"time"
 
 	customparser "sandbox.tcptohttp/parser"
 )
 
 func main() {
-	println("hello there \n")
-	println("hello there \n")
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		panic(err)
@@ -67,6 +69,10 @@ func main() {
 
 		parts := bytes.SplitN(buf, []byte("\r\n\r\n"), 2)
 		headerSection := parts[0]
+		if string(headerSection) == "" {
+			continue
+		}
+
 		var bodySection []byte
 		if len(parts) == 2 {
 			bodySection = parts[1]
@@ -75,17 +81,48 @@ func main() {
 		lines := bytes.Split(headerSection, []byte("\r\n"))
 		requestLine := string(lines[0])
 		headerLines := lines[1:]
-		requestInfo := customparser.ParseRequestLine(requestLine)
+		_ = customparser.ParseRequestLine(requestLine)
 		headers := customparser.ParseRequestHeader(headerLines)
 
-		contentType := headers["content-type"]
+		contentLength, _ := strconv.Atoi(headers["content-length"].(string))
+		remaining := contentLength - len(bodySection)
+
+	readMoreLoop:
+		for remaining > 0 {
+			n, err := conn.Read(tmp)
+
+			if err != nil {
+				break readMoreLoop
+			}
+
+			bodySection = append(bodySection, tmp[:n]...)
+			remaining -= n
+		}
+
+		contentType := (headers["content-type"]).(string)
+		println(contentType)
 
 		if contentType == "application/json" {
 			body, _ := customparser.ParseJSONBody(bodySection)
 			fmt.Println(body)
+		} else if strings.Contains(contentType, "multipart/form-data;") {
+			contentTypeParts := strings.SplitN(contentType, "=", 2)
+			boundary := contentTypeParts[1]
+			parts := customparser.ParseFormData(bodySection, boundary)
+			for _, part := range parts {
+				if part.Type == "text" {
+					println(string(part.Bytes))
+				} else {
+					extension := mimeToExtension[part.Type]
+					fileName := strconv.Itoa(int(time.Now().UnixMicro()))
+					os.WriteFile(fmt.Sprintf("tmp/%s.%s", fileName, extension), part.Bytes, 0644)
+				}
+			}
+		} else {
+			fileName := strconv.Itoa(int(time.Now().UnixMicro()))
+			extension := mimeToExtension[contentType]
+			os.WriteFile(fmt.Sprintf("tmp/%s.%s", fileName, extension), bodySection, 0644)
 		}
-
-		fmt.Println(requestInfo, headers, string(bodySection))
 
 		conn.Close()
 
