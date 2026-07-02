@@ -1,8 +1,7 @@
-package customparser
+package requestparser
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 )
 
@@ -23,8 +22,6 @@ func ParseFormData(body []byte, boundary string) []FormData {
 		if len(part) == 0 {
 			continue
 		}
-
-		fmt.Println("element ===>", string(part))
 
 		// split headers and body ONCE
 		split := bytes.SplitN(part, []byte("\r\n\r\n"), 2)

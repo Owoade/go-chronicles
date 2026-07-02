@@ -1,4 +1,4 @@
-package customparser
+package requestparser
 
 import "strings"
 

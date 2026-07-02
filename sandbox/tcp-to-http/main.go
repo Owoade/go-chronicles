@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -14,7 +15,8 @@ import (
 	"syscall"
 	"time"
 
-	customparser "sandbox.tcptohttp/parser"
+	requestparser "sandbox.tcptohttp/request-parser"
+	"sandbox.tcptohttp/response-writer"
 )
 
 func main() {
@@ -81,8 +83,8 @@ func main() {
 		lines := bytes.Split(headerSection, []byte("\r\n"))
 		requestLine := string(lines[0])
 		headerLines := lines[1:]
-		_ = customparser.ParseRequestLine(requestLine)
-		headers := customparser.ParseRequestHeader(headerLines)
+		_ = requestparser.ParseRequestLine(requestLine)
+		headers := requestparser.ParseRequestHeader(headerLines)
 
 		contentLength, _ := strconv.Atoi(headers["content-length"].(string))
 		remaining := contentLength - len(bodySection)
@@ -103,12 +105,13 @@ func main() {
 		println(contentType)
 
 		if contentType == "application/json" {
-			body, _ := customparser.ParseJSONBody(bodySection)
-			fmt.Println(body)
+			body, _ := requestparser.ParseJSONBody(bodySection)
+			resoponseBody, _ := json.Marshal(body)
+			response.WriteJSON(conn, response.StatusOK, string(resoponseBody))
 		} else if strings.Contains(contentType, "multipart/form-data;") {
 			contentTypeParts := strings.SplitN(contentType, "=", 2)
 			boundary := contentTypeParts[1]
-			parts := customparser.ParseFormData(bodySection, boundary)
+			parts := requestparser.ParseFormData(bodySection, boundary)
 			for _, part := range parts {
 				if part.Type == "text" {
 					println(string(part.Bytes))
